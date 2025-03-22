@@ -1,0 +1,23 @@
+' Gambas module file
+
+Public Function OpenConnection(DBType As String, DBHost As String, DBName As String, UserName As String, UserPassword As String, Optional sPort As String) As Connection
+
+  Dim conn As Connection
+
+  conn = New Connection
+  conn.Type = Lower(DBType)
+  conn.Host = DBHost
+  conn.Name = DBName
+  conn.Login = UserName
+  conn.Password = UserPassword
+  If sPort Then
+    conn.Port = sPort
+  Else
+    conn.Port = ""
+  Endif
+
+  Try conn.Open()
+
+  Return conn
+
+End

@@ -1,0 +1,3 @@
+' Gambas module file
+
+Public $myConn As Connection

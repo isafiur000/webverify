@@ -1,0 +1,17 @@
+' Gambas module file
+
+Public Sub Get7ZExtraction(CompressedPath As String, sPassword As String, UnCompressedPath As String)
+
+  Dim xcmd As String
+  Dim xnew As String
+
+  If System.Exist("7z") Then
+    xcmd = "7z x " & CompressedPath & " -p" & sPassword & " -o" & File.Dir(UnCompressedPath)
+    Shell xcmd Wait
+    xnew = File.Dir(UnCompressedPath) &/ Replace(File.Name(CompressedPath), ".7z", "")
+    If Exist(xnew) Then
+      Move xnew To UnCompressedPath
+    Endif
+  Endif
+
+End

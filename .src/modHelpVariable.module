@@ -1,0 +1,44 @@
+' Gambas module file
+
+Public $appetcFolder As String
+Public $appetcConfFile As String
+Public $appetc7zFile As String
+
+Public $SysConfigPath As String
+
+Public $CryptValue As String = "23qP53Xxszqytppz6uRIr9" ''for password/encryption
+Public $CryptDBVal As String = "23qP53Xxszqytppz6uRIr9"  ''for database
+Public $CryptZip As String = "23qP53Xxszqytppz6uRIr9"  ''only for 7z archiving for non-repository
+Public $CryptPDF As String = "23qP53Xszqppz6uIr9"    ''only for PDFencryption
+
+Public Sub MakeWorkingDir()
+
+  $appetcFolder = "/etc" &/ Application.Name
+  $appetcConfFile = $appetcFolder &/ Application.Name & ".conf"
+  $appetc7zFile = $appetcFolder &/ Application.Name & ".conf.7z"
+
+End
+
+Public Sub SetAppConfigFile()
+
+  If Exist(modHelpVariable.$appetcConfFile) Then
+    modHelpVariable.$SysConfigPath = modHelpVariable.$appetcConfFile
+  Else
+    modHelpVariable.$SysConfigPath = modHelpVariable.$appetc7zFile
+  Endif
+
+End
+
+Public Function GetConfigSettingFIle() As String
+
+  Dim xfile As String
+
+  xfile = Temp() & ".conf"
+  If $SysConfigPath = modHelpVariable.$appetcConfFile Then
+    File.Save(xfile, File.Load(modHelpVariable.$appetcConfFile))
+  Else
+    modDevAll.Get7ZExtraction(modHelpVariable.$appetc7zFile, $CryptZip, xfile)
+  Endif
+  Return xfile
+
+End

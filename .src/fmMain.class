@@ -1,0 +1,152 @@
+' Gambas class file
+
+Export
+
+Private $xuser As String
+Private $xpass As String
+Private $xapp As String
+Private $xtype As String
+
+Private $SysMainService As String
+Private $SysMainHost As String
+Private $SysMainUser As String
+Private $SysMainPassword As String
+Private $SysDataBase As String
+Private $SysMainPort As String
+Private $SysUseSSL As Boolean
+
+Public Sub _new()
+
+  Dim xx As String
+  Dim yy As String
+  Dim asx As String[]
+  Dim xuser As String
+  Dim xpass As String
+  Dim xapp As String
+  Dim xtype As String
+
+  Me.AddHeader("<meta name='viewport' content='width=device-width, initial-scale=1'>")
+  xx = CGI["REQUEST_URI"]
+  modHelpVariable.MakeWorkingDir()
+  modHelpVariable.SetAppConfigFile()
+
+  If InStr(xx, "?") > 0 Then
+    yy = Split(xx, "?")[1]
+    If yy Then
+      asx = Split(yy, "&")
+
+      If asx.Count > 0 Then
+        xuser = asx[0]
+        If InStr(xuser, "user") > 0 Then
+          xuser = Replace(xuser, "user=", "")
+        Endif
+      Else
+        xuser = ""
+      Endif
+
+      If asx.Count > 1 Then
+        xpass = asx[1]
+        If InStr(xpass, "pass") > 0 Then
+          xpass = Replace(xpass, "pass=", "")
+        Endif
+      Else
+        xpass = ""
+      Endif
+
+      If asx.Count > 2 Then
+        xtype = asx[2]
+        If InStr(xtype, "app") > 0 Then
+          xapp = Replace(xtype, "app=", "")
+        Endif
+      Else
+        xapp = ""
+      Endif
+
+      If asx.Count > 3 Then
+        xtype = asx[3]
+        If InStr(xtype, "type") > 0 Then
+          xtype = Replace(xtype, "type=", "")
+        Endif
+      Else
+        xtype = ""
+      Endif
+
+    Endif
+  Endif
+  $xuser = xuser
+  $xpass = xpass
+  $xapp = modPassword.DecryptSimple(xapp)
+  $xtype = xtype
+  ''?user=email&pass=code&app=encrypt(dbase)&type=verify/update
+
+  btnverify.Text = String.UCaseFirst($xtype)
+
+End
+
+Public Sub btnverify_Click()
+
+  Dim xfile As String
+  Dim xssl As String
+
+  xfile = modHelpVariable.GetConfigSettingFIle()
+  xssl = modControlSub.ShowSettingValue(xfile, $xapp & "/UseOpenSSL")
+  If xssl = "Yes" Then
+    $SysUseSSL = True
+  Else
+    $SysUseSSL = False
+  Endif
+  $SysDataBase = modControlSub.ShowSettingValue(xfile, $xapp & "/Database")
+  $SysMainService = modControlSub.ShowSettingValue(xfile, $xapp & "/Service")
+  $SysMainHost = modControlSub.ShowSettingValue(xfile, $xapp & "/Host")
+  $SysMainUser = modControlSub.ShowSettingValue(xfile, $xapp & "/User")
+  $SysMainPassword = modPassword.DecryptDBPass(modControlSub.ShowSettingValue(xfile, $xapp & "/Password"), $SysUseSSL)
+  $SysMainPort = modControlSub.ShowSettingValue(xfile, $xapp & "/Port")
+
+  If $SysMainPort Then
+    modDatabase.$myConn = modDBApp.OpenConnection($SysMainService, $SysMainHost, $SysDataBase, $SysMainUser, $SysMainPassword, $SysMainPort)
+  Else
+    modDatabase.$myConn = modDBApp.OpenConnection($SysMainService, $SysMainHost, $SysDataBase, $SysMainUser, $SysMainPassword)
+  Endif
+
+  If modDatabase.$myConn.Opened = True Then
+    If $xtype = "verify" Then
+      VerifyUserAccess()
+    Else If $xtype = "update" Then
+      UpdateUserPassword()
+    Endif
+  Endif
+
+End
+
+Private Sub VerifyUserAccess()
+
+  Dim res As Result
+
+  res = modDatabase.$myConn.Edit("tblremoteusers", "fldusrcode=&1 and fldhashcode=&2", $xuser, $xpass)
+  If res.Available Then
+    res["fldvertime"] = Now()
+    res["fldstatus"] = "Active"
+    res["fldhashcode"] = ""
+    res.Update
+    lblmessage.Text = "Account acivated"
+  Else
+    lblmessage.Text = "Error in activation"
+  Endif
+
+End
+
+Private Sub UpdateUserPassword()
+
+  Dim res As Result
+  Dim hForm As FmChangeText
+
+  res = modDatabase.$myConn.Edit("tblremoteusers", "fldusrcode=&1 and fldhashcode=&2", $xuser, $xpass)
+  If res.Available Then
+    hForm = New FmChangeText("Change Password", $xuser, "", "tblremoteusers", "fldusrcode", "fldpassword")
+    hForm.ShowModal
+
+    res["fldhashcode"] = ""
+    res.Update
+  Endif
+
+End

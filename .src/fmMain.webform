@@ -1,0 +1,48 @@
+# Gambas Form File 3.0
+
+{ WebForm WebForm
+  #MoveScaled(0,0,67,41)
+  Arrangement = Arrange.Vertical
+  Margin = True
+  Spacing = True
+  { WebContainer2 WebContainer
+    #MoveScaled(1,1,65,10)
+    Height = "20vh"
+  }
+  { WebContainer1 WebContainer
+    #MoveScaled(1,12,65,6)
+    Arrangement = Arrange.Horizontal
+    { WebContainer4 WebContainer
+      #MoveScaled(1,1,14,4)
+      Expand = True
+    }
+    { btnverify WebButton
+      #MoveScaled(15,1,16,4)
+      Width = "8em"
+      Height = "2em"
+      Text = ("Verify")
+    }
+    { WebContainer3 WebContainer
+      #MoveScaled(31,1,14,4)
+      Expand = True
+    }
+  }
+  { WebContainer5 WebContainer
+    #MoveScaled(1,19,65,4)
+    Arrangement = Arrange.Horizontal
+    { WebContainer6 WebContainer
+      #MoveScaled(1,1,14,2)
+      Expand = True
+    }
+    { lblmessage WebLabel
+      #MoveScaled(15,1,21,2)
+      Width = "10em"
+      Height = "2em"
+      Alignment = Align.Center
+    }
+    { WebContainer7 WebContainer
+      #MoveScaled(36,1,14,2)
+      Expand = True
+    }
+  }
+}
